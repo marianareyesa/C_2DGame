@@ -7,7 +7,7 @@
 #include <iostream>
 #include "game.h"
 #include "move.h"
-
+#include "moveup.h"
 
 const float Game::SCENE_WIDTH = 1000.0f;
 const float Game::SCENE_HEIGHT = 800.0f;
@@ -76,11 +76,8 @@ void Game::processInput() {
 /**
  * Function to update the position of the player
  */
-void Game::update(sf::Time delta, sf::Shape &player) {
-    Coordinate playerPosition = {player.getPosition().x, player.getPosition().y};
-    Coordinate velocity = { SPEED, SPEED };
-    Coordinate newPosition = move(playerPosition, velocity, 0.001f * delta.asMilliseconds());
-    player.setPosition(newPosition.x, newPosition.y);
+void Game::update(sf::Time delta) {
+    moveUp(player, SPEED, delta);
 }
 
 /**
@@ -99,7 +96,7 @@ int Game::run() {
     while (window.isOpen()) {
         sf::Time delta = clock.restart();
         processInput();
-        update(delta, player);
+        update(delta);
         render();
     }
     return 0;
