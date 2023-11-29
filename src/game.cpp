@@ -9,8 +9,8 @@
 #include "move.h"
 
 
-const float Game::SCENE_WIDTH = 800.0f;
-const float Game::SCENE_HEIGHT = 600.0f;
+const float Game::SCENE_WIDTH = 1000.0f;
+const float Game::SCENE_HEIGHT = 800.0f;
 const float Game::PLAYER_START_X = 400.0f;
 const float Game::PLAYER_START_Y = 300.0f;
 const float Game::RADIUS = 40.0f;
@@ -25,7 +25,7 @@ Game::Game() {
  * Window initializer.
  */
 int Game::initWindow() {
-    window.create(sf::VideoMode(SCENE_WIDTH, SCENE_HEIGHT), "My 2D game");
+    window.create(sf::VideoMode(SCENE_WIDTH, SCENE_HEIGHT), "MkM Game");
     window.setFramerateLimit(120);
     return 0;
 }
@@ -50,7 +50,7 @@ int Game::initPlayer() {
     player.setRadius(RADIUS);
     player.setOrigin(RADIUS, RADIUS);
     player.setPosition(PLAYER_START_X, PLAYER_START_Y);
-    if (!playerTexture.loadFromFile("resources/pacman.png")) {
+    if (!playerTexture.loadFromFile("resources/donut.png")) {
         return 1;
     }
     player.setTexture(&playerTexture);
