@@ -7,6 +7,7 @@
 #include <iostream>
 #include "game.h"
 #include "move.h"
+#include <cmath>
 
 const float Game::SCENE_WIDTH = 1000.0f;
 const float Game::SCENE_HEIGHT = 800.0f;
@@ -19,6 +20,7 @@ Game::Game() {
     initWindow();
     initBackground();
     initPlayer();
+    initNPC();
 }
 /**
  * Window initializer.
@@ -57,6 +59,20 @@ int Game::initPlayer() {
 }
 
 /**
+* Evil donuts initializer
+*/
+int Game::initNPC() {
+    ghost.setRadius(RADIUS);
+    ghost.setOrigin(RADIUS, RADIUS);
+    ghost.setPosition(PLAYER_START_X + 10, PLAYER_START_Y + 10);
+    if (!ghostTexture.loadFromFile("resources/evil_donut.png")) {
+        return 1;
+    }
+    ghost.setTexture(&ghostTexture);
+    return 0;
+}
+
+/**
  * Dealing with events on window.
  */
 void Game::processInput() {
@@ -70,6 +86,60 @@ void Game::processInput() {
             default:
                 break;
         }
+    }
+}
+
+// Function to generate random directions for ghost's movement
+sf::Vector2f Game::generateRandomDirection() {
+    // Generate random directions for x and y components
+    float randX = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) - 0.5f; // Random value between -0.5 and 0.5
+    float randY = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) - 0.5f; // Random value between -0.5 and 0.5
+    
+    // Adjust the random direction based on the current ghost position to prevent going out of bounds
+    sf::Vector2f direction(randX, randY);
+
+    // Get the ghost's current position
+    sf::Vector2f ghostPosition = ghost.getPosition();
+
+    // Define bounds based on ghost radius and scene size
+    float minX = ghost.getRadius();
+    float maxX = SCENE_WIDTH - ghost.getRadius();
+    float minY = ghost.getRadius();
+    float maxY = SCENE_HEIGHT - ghost.getRadius();
+
+    // Limit the movement direction to keep the ghost within bounds
+    if (ghostPosition.x <= minX) {
+        direction.x = std::abs(direction.x); // Move away from the left edge
+    } else if (ghostPosition.x >= maxX) {
+        direction.x = -std::abs(direction.x); // Move away from the right edge
+    }
+
+    if (ghostPosition.y <= minY) {
+        direction.y = std::abs(direction.y); // Move away from the top edge
+    } else if (ghostPosition.y >= maxY) {
+        direction.y = -std::abs(direction.y); // Move away from the bottom edge
+    }
+
+    return direction;
+}
+
+// Update function to move the ghost randomly
+void Game::updateGhost(sf::Time delta) {
+    sf::Vector2f direction = generateRandomDirection(); // Get random direction
+    
+    // Normalize the direction to maintain consistent speed regardless of the vector's length
+    float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+    if (length != 0) {
+        direction.x /= length;
+        direction.y /= length;
+    }    
+
+    sf::Vector2f newPosition = ghost.getPosition() + direction * 150.0f * delta.asSeconds(); // Adjust speed   
+
+    // Check if the new position falls within the scene boundaries
+    if (newPosition.x - ghost.getRadius() >= 0 && newPosition.x + ghost.getRadius() <= SCENE_WIDTH &&
+        newPosition.y - ghost.getRadius() >= 0 && newPosition.y + ghost.getRadius() <= SCENE_HEIGHT) {
+        ghost.setPosition(newPosition); // Update ghost's position
     }
 }
 
@@ -91,6 +161,7 @@ void Game::update(sf::Time delta, sf::Shape &player) {
         newPosition.y - RADIUS >= 0 && newPosition.y + RADIUS <= SCENE_HEIGHT) {
         player.setPosition(newPosition.x, newPosition.y);
     }
+    updateGhost(delta);
 }
 
 void Game::updatePlayerPosition(sf::Vector2f velocity) {
@@ -110,6 +181,7 @@ void Game::render() {
     window.clear(sf::Color::White);
     window.draw(background);
     window.draw(player);
+    window.draw(ghost);
     window.display();
 }
 /**

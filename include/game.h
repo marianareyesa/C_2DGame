@@ -17,7 +17,9 @@ private:
     sf::Sprite background;
     sf::Texture backgroundTexture;
     sf::Texture playerTexture;
+    sf::Texture ghostTexture;
     sf::CircleShape player;
+    sf::CircleShape ghost;
     sf::Clock clock;
 
     static const float SCENE_WIDTH;
@@ -30,7 +32,10 @@ private:
     int initWindow();
     int initBackground();
     int initPlayer();
+    int initNPC();
     void processInput();
+    sf::Vector2f generateRandomDirection();
+    void updateGhost(sf::Time delta);
     void update(sf::Time delta, sf::Shape &player);
     void updatePlayerPosition(sf::Vector2f velocity);
     void render();
