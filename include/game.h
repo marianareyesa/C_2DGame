@@ -31,6 +31,7 @@ private:
     int initBackground();
     int initPlayer();
     void processInput();
-    void update(sf::Time delta);
+    void update(sf::Time delta, sf::Shape &player);
+    void updatePlayerPosition(sf::Vector2f velocity);
     void render();
 };

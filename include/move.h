@@ -14,4 +14,4 @@ Coordinate add(Coordinate x, Coordinate y);
 
 Coordinate mul(float s, Coordinate a);
 
-Coordinate move(Coordinate position, Coordinate velocity, float delta);
+Coordinate move(Coordinate position, float speed, float delta, bool moveLeft, bool moveRight, bool moveUp, bool moveDown);

@@ -21,6 +21,21 @@ Coordinate mul(float s, Coordinate a) {
     return b;
 }
 
-Coordinate move(Coordinate position, Coordinate velocity, float delta) {
+Coordinate move(Coordinate position, float speed, float delta, bool moveLeft, bool moveRight, bool moveUp, bool moveDown) {
+    // Calculate the velocity based on arrow key inputs
+    Coordinate velocity = { 0.0f, 0.0f};
+    if (moveLeft) {
+        velocity.x -= speed;
+    }
+    if (moveRight) {
+        velocity.x += speed;
+    }
+    if (moveUp) {
+        velocity.y -= speed;
+    }
+    if (moveDown) {
+        velocity.y += speed;
+    }    
+
     return add(position, mul(delta, velocity));
 }

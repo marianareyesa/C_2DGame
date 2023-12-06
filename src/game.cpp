@@ -7,7 +7,6 @@
 #include <iostream>
 #include "game.h"
 #include "move.h"
-#include "moveup.h"
 
 const float Game::SCENE_WIDTH = 1000.0f;
 const float Game::SCENE_HEIGHT = 800.0f;
@@ -61,6 +60,7 @@ int Game::initPlayer() {
  * Dealing with events on window.
  */
 void Game::processInput() {
+
     sf::Event event;
     while (window.pollEvent(event)) {
         switch (event.type) {
@@ -76,8 +76,31 @@ void Game::processInput() {
 /**
  * Function to update the position of the player
  */
-void Game::update(sf::Time delta) {
-    moveUp(player, SPEED, delta);
+void Game::update(sf::Time delta, sf::Shape &player) {
+    bool moveLeft = sf::Keyboard::isKeyPressed(sf::Keyboard::Left);
+    bool moveRight = sf::Keyboard::isKeyPressed(sf::Keyboard::Right);
+    bool moveUp = sf::Keyboard::isKeyPressed(sf::Keyboard::Up);
+    bool moveDown = sf::Keyboard::isKeyPressed(sf::Keyboard::Down);
+
+    Coordinate playerPosition = {player.getPosition().x, player.getPosition().y};
+   
+    Coordinate newPosition = move(playerPosition, SPEED, 0.001f * delta.asMilliseconds(), moveLeft, moveRight, moveUp, moveDown);
+    
+    // Ensure the player stays within the scene boundaries
+    if (newPosition.x - RADIUS >= 0 && newPosition.x + RADIUS <= SCENE_WIDTH &&
+        newPosition.y - RADIUS >= 0 && newPosition.y + RADIUS <= SCENE_HEIGHT) {
+        player.setPosition(newPosition.x, newPosition.y);
+    }
+}
+
+void Game::updatePlayerPosition(sf::Vector2f velocity) {
+    sf::Vector2f newPosition = player.getPosition() + velocity;
+
+    // Ensure the player stays within the scene
+    if (newPosition.x - RADIUS >= 0 && newPosition.x + RADIUS <= SCENE_WIDTH &&
+        newPosition.y - RADIUS >= 0 && newPosition.y + RADIUS <= SCENE_HEIGHT) {
+        player.setPosition(newPosition);
+    }
 }
 
 /**
@@ -96,8 +119,8 @@ int Game::run() {
     while (window.isOpen()) {
         sf::Time delta = clock.restart();
         processInput();
-        update(delta);
-        render();
+        update(delta, player);
+	render();
     }
     return 0;
 }
