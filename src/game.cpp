@@ -21,6 +21,8 @@ Game::Game() {
     initBackground();
     initPlayer();
     initNPC();
+    needsNewDirection = true; // Initialize needsNewDirection to indicate a new direction is needed initially
+    ghostDirection = generateRandomDirection(); // Initialize direction with a random direction
 }
 /**
  * Window initializer.
@@ -125,21 +127,23 @@ sf::Vector2f Game::generateRandomDirection() {
 
 // Update function to move the ghost randomly
 void Game::updateGhost(sf::Time delta) {
-    sf::Vector2f direction = generateRandomDirection(); // Get random direction
-    
-    // Normalize the direction to maintain consistent speed regardless of the vector's length
-    float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-    if (length != 0) {
-        direction.x /= length;
-        direction.y /= length;
+    // Check if the ghost needs a new direction
+    if (needsNewDirection) {
+        ghostDirection = generateRandomDirection(); // Get a random direction
+        needsNewDirection = false;
     }    
 
-    sf::Vector2f newPosition = ghost.getPosition() + direction * 150.0f * delta.asSeconds(); // Adjust speed   
+    sf::Vector2f newPosition = ghost.getPosition() + ghostDirection * 800.0f * delta.asSeconds(); // Adjust speed   
 
     // Check if the new position falls within the scene boundaries
     if (newPosition.x - ghost.getRadius() >= 0 && newPosition.x + ghost.getRadius() <= SCENE_WIDTH &&
         newPosition.y - ghost.getRadius() >= 0 && newPosition.y + ghost.getRadius() <= SCENE_HEIGHT) {
         ghost.setPosition(newPosition); // Update ghost's position
+    }
+    else {
+        // Bounce off the border by changing direction at a random angle
+        ghostDirection = generateRandomDirection(); // Get a new random direction
+        needsNewDirection = true; // Signal that a new direction is needed
     }
 }
 

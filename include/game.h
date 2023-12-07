@@ -21,6 +21,8 @@ private:
     sf::CircleShape player;
     sf::CircleShape ghost;
     sf::Clock clock;
+    bool needsNewDirection;
+    sf::Vector2f ghostDirection;
 
     static const float SCENE_WIDTH;
     static const float SCENE_HEIGHT;
