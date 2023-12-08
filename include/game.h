@@ -37,6 +37,7 @@ private:
     int initNPC();
     void processInput();
     sf::Vector2f generateRandomDirection();
+    bool checkCollision();
     void updateGhost(sf::Time delta);
     void update(sf::Time delta, sf::Shape &player);
     void updatePlayerPosition(sf::Vector2f velocity);

@@ -66,7 +66,10 @@ int Game::initPlayer() {
 int Game::initNPC() {
     ghost.setRadius(RADIUS);
     ghost.setOrigin(RADIUS, RADIUS);
-    ghost.setPosition(PLAYER_START_X + 10, PLAYER_START_Y + 10);
+    // Set the ghost's initial position randomly within the scene
+    float randomX = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * (SCENE_WIDTH - 2 * RADIUS) + RADIUS;
+    float randomY = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * (SCENE_HEIGHT - 2 * RADIUS) + RADIUS;
+    ghost.setPosition(randomX, randomY);
     if (!ghostTexture.loadFromFile("resources/evil_donut.png")) {
         return 1;
     }
@@ -125,6 +128,20 @@ sf::Vector2f Game::generateRandomDirection() {
     return direction;
 }
 
+bool Game::checkCollision() {
+    sf::Vector2f playerPos = player.getPosition();
+    sf::Vector2f ghostPos = ghost.getPosition();
+    float playerRadius = player.getRadius();
+    float ghostRadius = ghost.getRadius();
+
+    float dx = playerPos.x - ghostPos.x;
+    float dy = playerPos.y - ghostPos.y;
+    float distance = std::sqrt(dx * dx + dy * dy);
+
+    return distance < playerRadius + ghostRadius;
+}
+
+
 // Update function to move the ghost randomly
 void Game::updateGhost(sf::Time delta) {
     // Check if the ghost needs a new direction
@@ -165,6 +182,11 @@ void Game::update(sf::Time delta, sf::Shape &player) {
         newPosition.y - RADIUS >= 0 && newPosition.y + RADIUS <= SCENE_HEIGHT) {
         player.setPosition(newPosition.x, newPosition.y);
     }
+    
+    if (checkCollision()) {
+        ghost.setPosition(-1000, -1000); // Move ghost off-screen (or hide it in any other way)
+    }
+
     updateGhost(delta);
 }
 
