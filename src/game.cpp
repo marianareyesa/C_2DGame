@@ -14,7 +14,7 @@ const float Game::SCENE_HEIGHT = 800.0f;
 const float Game::PLAYER_START_X = 400.0f;
 const float Game::PLAYER_START_Y = 300.0f;
 const float Game::RADIUS = 40.0f;
-const float Game::SPEED = 150.0f;
+const float Game::SPEED = 250.0f;
 
 Game::Game() {
     initWindow();
@@ -64,16 +64,22 @@ int Game::initPlayer() {
 * Evil donuts initializer
 */
 int Game::initNPC() {
-    ghost.setRadius(RADIUS);
-    ghost.setOrigin(RADIUS, RADIUS);
-    // Set the ghost's initial position randomly within the scene
-    float randomX = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * (SCENE_WIDTH - 2 * RADIUS) + RADIUS;
-    float randomY = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * (SCENE_HEIGHT - 2 * RADIUS) + RADIUS;
-    ghost.setPosition(randomX, randomY);
-    if (!ghostTexture.loadFromFile("resources/evil_donut.png")) {
-        return 1;
+    for (int i = 0; i < MAX_GHOSTS; ++i) {
+        ghosts[i].setRadius(RADIUS);
+        ghosts[i].setOrigin(RADIUS, RADIUS);
+
+        float randomX = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * (SCENE_WIDTH - 2 * RADIUS) + RADIUS;
+        float randomY = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * (SCENE_HEIGHT - 2 * RADIUS) + RADIUS;
+        ghosts[i].setPosition(randomX, randomY);
+
+        if (!ghostTexture.loadFromFile("resources/evil_donut.png")) {
+            return 1;
+        }
+        ghosts[i].setTexture(&ghostTexture);
+
+        ghostDirections[i] = generateRandomDirection(); // Initialize directions for each ghost
+        needsNewDirections[i] = true; // Indicate that a new direction is initially needed
     }
-    ghost.setTexture(&ghostTexture);
     return 0;
 }
 
@@ -128,46 +134,69 @@ sf::Vector2f Game::generateRandomDirection() {
     return direction;
 }
 
-bool Game::checkCollision() {
-    sf::Vector2f playerPos = player.getPosition();
-    sf::Vector2f ghostPos = ghost.getPosition();
-    float playerRadius = player.getRadius();
-    float ghostRadius = ghost.getRadius();
+bool Game::checkCollision(const sf::Shape& shape1, const sf::Shape& shape2) {
+    sf::FloatRect shape1Bounds = shape1.getGlobalBounds();
+    sf::FloatRect shape2Bounds = shape2.getGlobalBounds();
 
-    float dx = playerPos.x - ghostPos.x;
-    float dy = playerPos.y - ghostPos.y;
-    float distance = std::sqrt(dx * dx + dy * dy);
-
-    return distance < playerRadius + ghostRadius;
+    return shape1Bounds.intersects(shape2Bounds);
 }
 
-
-// Update function to move the ghost randomly
-void Game::updateGhost(sf::Time delta) {
-    // Check if the ghost needs a new direction
-    if (needsNewDirection) {
-        ghostDirection = generateRandomDirection(); // Get a random direction
-        needsNewDirection = false;
-    }    
-
-    sf::Vector2f newPosition = ghost.getPosition() + ghostDirection * 800.0f * delta.asSeconds(); // Adjust speed   
-
-    // Check if the new position falls within the scene boundaries
-    if (newPosition.x - ghost.getRadius() >= 0 && newPosition.x + ghost.getRadius() <= SCENE_WIDTH &&
-        newPosition.y - ghost.getRadius() >= 0 && newPosition.y + ghost.getRadius() <= SCENE_HEIGHT) {
-        ghost.setPosition(newPosition); // Update ghost's position
-    }
-    else {
-        // Bounce off the border by changing direction at a random angle
-        ghostDirection = generateRandomDirection(); // Get a new random direction
-        needsNewDirection = true; // Signal that a new direction is needed
-    }
-}
 
 /**
  * Function to update the position of the player
  */
 void Game::update(sf::Time delta, sf::Shape &player) {
+    // Generate a random number between 0 and 1
+    float randomProbability = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+
+    // Define a probability threshold for ghost spawn
+    float spawnProbability = 0.02f; // Adjust this value to control spawn frequency
+
+    if (randomProbability < spawnProbability) {
+        // Find an inactive ghost and spawn it
+        for (int i = 0; i < MAX_GHOSTS; ++i) {
+            if (ghosts[i].getPosition().x < 0 || ghosts[i].getPosition().y < 0) {
+                // Generate a random direction for the new ghost
+                ghostDirections[i] = generateRandomDirection();
+                needsNewDirections[i] = false;
+
+                // Set the new ghost's position and update other properties as needed
+                float randomX = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * (SCENE_WIDTH - 2 * RADIUS) + RADIUS;
+                float randomY = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * (SCENE_HEIGHT - 2 * RADIUS) + RADIUS;
+                ghosts[i].setPosition(randomX, randomY);
+                break; // Exit the loop after spawning one ghost
+            }
+        }
+    }
+
+    // Update player and each ghost
+    for (int i = 0; i < MAX_GHOSTS; ++i) {
+        if (needsNewDirections[i]) {
+            ghostDirections[i] = generateRandomDirection();
+            needsNewDirections[i] = false;
+        }
+
+        sf::Vector2f newPosition = ghosts[i].getPosition() + ghostDirections[i] * 800.0f * delta.asSeconds();
+
+        // Check for window boundaries and adjust ghost movement
+        float ghostRadius = ghosts[i].getRadius();
+        if (newPosition.x - ghostRadius >= 0 && newPosition.x + ghostRadius <= SCENE_WIDTH &&
+            newPosition.y - ghostRadius >= 0 && newPosition.y + ghostRadius <= SCENE_HEIGHT) {
+            // Ghost within boundaries, update position
+            ghosts[i].setPosition(newPosition);
+        } else {
+            // Ghost reached boundary, change direction
+            ghostDirections[i].x = -ghostDirections[i].x;
+            ghostDirections[i].y = -ghostDirections[i].y;
+        }
+
+        // Check for collision with player
+        if (checkCollision(player, ghosts[i])) {
+            // Player collided with the ghost, take appropriate action
+            ghosts[i].setPosition(-1000, -1000); // Move ghost off-screen (or hide it in any other way)
+        }
+    }
+
     bool moveLeft = sf::Keyboard::isKeyPressed(sf::Keyboard::Left);
     bool moveRight = sf::Keyboard::isKeyPressed(sf::Keyboard::Right);
     bool moveUp = sf::Keyboard::isKeyPressed(sf::Keyboard::Up);
@@ -183,11 +212,6 @@ void Game::update(sf::Time delta, sf::Shape &player) {
         player.setPosition(newPosition.x, newPosition.y);
     }
     
-    if (checkCollision()) {
-        ghost.setPosition(-1000, -1000); // Move ghost off-screen (or hide it in any other way)
-    }
-
-    updateGhost(delta);
 }
 
 void Game::updatePlayerPosition(sf::Vector2f velocity) {
@@ -207,7 +231,9 @@ void Game::render() {
     window.clear(sf::Color::White);
     window.draw(background);
     window.draw(player);
-    window.draw(ghost);
+    for (int i = 0; i < MAX_GHOSTS; ++i) {
+        window.draw(ghosts[i]);
+    }
     window.display();
 }
 /**

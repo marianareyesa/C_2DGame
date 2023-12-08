@@ -13,12 +13,17 @@ public:
     int run();
 
 private:
+    static const int MAX_GHOSTS = 5;
+
     sf::RenderWindow window;
     sf::Sprite background;
     sf::Texture backgroundTexture;
     sf::Texture playerTexture;
     sf::Texture ghostTexture;
     sf::CircleShape player;
+    sf::CircleShape ghosts[MAX_GHOSTS]; // Array to hold multiple ghosts
+    sf::Vector2f ghostDirections[MAX_GHOSTS]; // Hold directions for each ghost
+    bool needsNewDirections[MAX_GHOSTS]; // Track if a new direction is needed
     sf::CircleShape ghost;
     sf::Clock clock;
     bool needsNewDirection;
@@ -37,8 +42,7 @@ private:
     int initNPC();
     void processInput();
     sf::Vector2f generateRandomDirection();
-    bool checkCollision();
-    void updateGhost(sf::Time delta);
+    bool checkCollision(const sf::Shape& shape1, const sf::Shape& shape2);
     void update(sf::Time delta, sf::Shape &player);
     void updatePlayerPosition(sf::Vector2f velocity);
     void render();
