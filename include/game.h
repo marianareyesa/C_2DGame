@@ -28,6 +28,10 @@ private:
     sf::Clock clock;
     bool needsNewDirection;
     sf::Vector2f ghostDirection;
+    sf::Clock gameClock; // Timer to keep track of game time
+    sf::Time gameTime; // Duration of the game
+    int score; // Player's score for eating ghosts
+    bool gameOverFlag; // Flag to indicate if the game is over
 
     static const float SCENE_WIDTH;
     static const float SCENE_HEIGHT;
@@ -43,6 +47,7 @@ private:
     void processInput();
     sf::Vector2f generateRandomDirection();
     bool checkCollision(const sf::Shape& shape1, const sf::Shape& shape2);
+    void gameOver();
     void update(sf::Time delta, sf::Shape &player);
     void updatePlayerPosition(sf::Vector2f velocity);
     void render();

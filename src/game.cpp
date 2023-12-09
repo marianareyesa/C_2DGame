@@ -23,6 +23,9 @@ Game::Game() {
     initNPC();
     needsNewDirection = true; // Initialize needsNewDirection to indicate a new direction is needed initially
     ghostDirection = generateRandomDirection(); // Initialize direction with a random direction
+    gameTime = sf::seconds(30); // Set game duration
+    score = 0; // Initialize player score
+    gameOverFlag = false; // Initialize game over flag
 }
 /**
  * Window initializer.
@@ -141,11 +144,27 @@ bool Game::checkCollision(const sf::Shape& shape1, const sf::Shape& shape2) {
     return shape1Bounds.intersects(shape2Bounds);
 }
 
+void Game::gameOver() {
+    window.close();
+    std::cout << "Game Over! Your Score: " << score << std::endl;
+    // Reset game variables for a new game
+    score = 0;
+    gameTime = sf::seconds(60);
+    gameOverFlag = false;
+}
+
 
 /**
  * Function to update the position of the player
  */
 void Game::update(sf::Time delta, sf::Shape &player) {
+    if(!gameOverFlag){
+    gameTime -= delta; // Decrement game time by delta
+
+        if (gameTime <= sf::Time::Zero) {
+            // Game over condition - handle end of the game
+            gameOverFlag = true;
+        }
     // Generate a random number between 0 and 1
     float randomProbability = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
 
@@ -193,6 +212,7 @@ void Game::update(sf::Time delta, sf::Shape &player) {
         // Check for collision with player
         if (checkCollision(player, ghosts[i])) {
             // Player collided with the ghost, take appropriate action
+            score++;
             ghosts[i].setPosition(-1000, -1000); // Move ghost off-screen (or hide it in any other way)
         }
     }
@@ -211,7 +231,10 @@ void Game::update(sf::Time delta, sf::Shape &player) {
         newPosition.y - RADIUS >= 0 && newPosition.y + RADIUS <= SCENE_HEIGHT) {
         player.setPosition(newPosition.x, newPosition.y);
     }
-    
+    }
+    if(gameOverFlag){
+        gameOver();
+    }
 }
 
 void Game::updatePlayerPosition(sf::Vector2f velocity) {
