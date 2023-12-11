@@ -63,7 +63,5 @@ Once dependencies are set, you can compile the project with `cmake` in CLion and
   - The game ends either when the time runs out or if the donut collides with an evil donut.
   - Display the final score when the game ends.
 
----
 
-## Developers Guide
 
