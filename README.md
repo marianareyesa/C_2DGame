@@ -6,3 +6,11 @@ This project depends on the [SFML library](https://www.sfml-dev.org/index.php). 
 
 ## Compile and run
 Once dependencies are set, you can compile the project with `cmake` in CLion and run it directly. Via command line you can ask `cmake` to generate the `Makefile` and then run `make all`
+
+## Implementation guideline
+
+## Assumption on environments
+
+## Users guide
+
+## Developers guide
