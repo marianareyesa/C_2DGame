@@ -49,7 +49,7 @@ To compile the code, make sure to have sfml installed and run g++ src/*.cpp -Iin
 
 ### Gameplay
 - **Objective:** 
-  - Control the donut character to eat all the evil donuts while avoiding collision with them.
+  - Control the donut character to eat as many evil donuts as you can in 30 seconds.
 
 - **Controls:** 
   - Use the arrow keys (Up, Down, Left, Right) to navigate the donut character on the game scene.
@@ -61,8 +61,8 @@ To compile the code, make sure to have sfml installed and run g++ src/*.cpp -Iin
   - Each time the donut consumes an evil donut, the score increases.
 
 - **Game Over:** 
-  - The game ends either when the time runs out or if the donut collides with an evil donut.
-  - Display the final score when the game ends.
+  - The game ends when the time runs out.
+  - Display the final score (amount of evil donuts eaten) when the game ends.
 
 
 
