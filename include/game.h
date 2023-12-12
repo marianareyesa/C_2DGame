@@ -1,9 +1,4 @@
-/*
- * File: game.h
- * Author: Alessandra Gorla
- * Date: November 21, 2023
- * Description: Game class header.
- */
+
 #pragma once
 #include <SFML/Graphics.hpp>
 
@@ -32,6 +27,8 @@ private:
     sf::Time gameTime; // Duration of the game
     int score; // Player's score for eating ghosts
     bool gameOverFlag; // Flag to indicate if the game is over
+    sf::Font font; // Font for text rendering
+    sf::Text timerText; // Text to display the timer
 
     static const float SCENE_WIDTH;
     static const float SCENE_HEIGHT;
@@ -51,4 +48,5 @@ private:
     void update(sf::Time delta, sf::Shape &player);
     void updatePlayerPosition(sf::Vector2f velocity);
     void render();
+    void renderTimer();
 };

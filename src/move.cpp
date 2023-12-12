@@ -1,10 +1,3 @@
-/*
- * File: move.cpp
- * Author: Alessandra Gorla
- * Date: November 22, 2023
- * Description: Move module. It offers the functionality to let the player move.
- */
-
 #include "move.h"
 
 Coordinate add(Coordinate a, Coordinate b) {

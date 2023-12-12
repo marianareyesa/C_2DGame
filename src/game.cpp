@@ -1,9 +1,4 @@
-/*
- * File: game.cpp
- * Author: Alessandra Gorla
- * Date: November 21, 2023
- * Description: Game class to deal with initialization and controller of 2D my game application.
- */
+
 #include <iostream>
 #include "game.h"
 #include "move.h"
@@ -26,6 +21,16 @@ Game::Game() {
     gameTime = sf::seconds(30); // Set game duration
     score = 0; // Initialize player score
     gameOverFlag = false; // Initialize game over flag
+
+    if (!font.loadFromFile("resources/Roboto-Black.ttf")) {
+        std::cerr << "Failed to load font!" << std::endl;
+    }
+
+    // Setup timer text properties
+    timerText.setFont(font);
+    timerText.setCharacterSize(24);
+    timerText.setFillColor(sf::Color::White);
+    timerText.setPosition(10.0f, 10.0f); // Adjust the position of the timer text
 }
 /**
  * Window initializer.
@@ -145,12 +150,17 @@ bool Game::checkCollision(const sf::Shape& shape1, const sf::Shape& shape2) {
 }
 
 void Game::gameOver() {
+    window.clear(sf::Color::Black); // Clear the window
+    sf::Text endText;
+    endText.setFont(font); // Assuming you have already loaded the font
+    endText.setCharacterSize(50);
+    endText.setFillColor(sf::Color::White);
+    endText.setString("Game Over!\nYour Score: " + std::to_string(score));
+    endText.setPosition((SCENE_WIDTH - endText.getLocalBounds().width) / 2, (SCENE_HEIGHT - endText.getLocalBounds().height) / 2);
+    window.draw(endText);
+    window.display();
+    sf::sleep(sf::seconds(5)); // Show the end screen for 3 seconds before closing
     window.close();
-    std::cout << "Game Over! Your Score: " << score << std::endl;
-    // Reset game variables for a new game
-    score = 0;
-    gameTime = sf::seconds(60);
-    gameOverFlag = false;
 }
 
 
@@ -247,6 +257,16 @@ void Game::updatePlayerPosition(sf::Vector2f velocity) {
     }
 }
 
+void Game::renderTimer() {
+    // Convert the remaining game time to seconds and display it as text
+    int seconds = static_cast<int>(gameTime.asSeconds());
+    std::string timerString = "Time: " + std::to_string(seconds) + "s";
+    timerText.setString(timerString);
+
+    // Render the timer text on the window
+    window.draw(timerText);
+}
+
 /**
  * Render elements in the window
  */
@@ -257,6 +277,7 @@ void Game::render() {
     for (int i = 0; i < MAX_GHOSTS; ++i) {
         window.draw(ghosts[i]);
     }
+    renderTimer();
     window.display();
 }
 /**
