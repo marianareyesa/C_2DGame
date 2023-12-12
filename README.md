@@ -56,7 +56,7 @@ Once dependencies are set, you can compile the project with `cmake` in CLion and
 
 - **Rules:** 
   - The game is timed to eat as many evil donuts as possible.
-  - Avoid collision with evil donuts, as they will cause the game to end.
+  - Get as many collisions as possible to gain points
   - Each time the donut consumes an evil donut, the score increases.
 
 - **Game Over:** 
